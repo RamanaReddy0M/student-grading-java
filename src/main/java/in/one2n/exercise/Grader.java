@@ -5,17 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Grader {
-
-    public static void main(String[] args) {
-        Grader grader = new Grader();
-        List<Student> students = grader.calculateGrade(
-                grader.parseCSV(Paths.get("src", "test", "resources", "grades.csv").toString()));
-        grader.findTopperPerUniversity(students);
-
-    }
 
     /*
     * Using supplier to get stream two times,
@@ -55,43 +48,20 @@ public class Grader {
     }
 
     public Student findOverallTopper(List<Student> gradedStudents) {
-        if(gradedStudents.size() < 1)
-            return null;
-        double max = 0.0d;
-        Student topper = null;
-        for(Student s: gradedStudents)
-            if(s.getFinalScore() > max){
-                max = s.getFinalScore();
-                topper = s;
-            }
+        Student topper = gradedStudents.stream()
+                .max(Comparator.comparing(Student::getFinalScore))
+                .get();
         return new Student(topper.getFirstname(), topper.getLastname(), topper.getUniversity());
     }
 
-    /*
-    * uses comparator to sort list by university
-    * here, findOverAllTopper() return new copy of student
-    * */
-    public Map<String, Student> findTopperPerUniversity(List<Student> gradedStudents) {
 
+    public Map<String, Student> findTopperPerUniversity(List<Student> gradedStudents) {
         Map<String, Student> toppers = new HashMap<>();
-        List<Student> students = new ArrayList<>(gradedStudents);
-        //for processing last record
-        students.add(new Student("", "", "{}"));
-        Comparator<Student> compareByUniversity = (s1, s2) -> s1.getUniversity().compareTo(s2.getUniversity());
-        Collections.sort(students, compareByUniversity);
-        //for storing students by university
-        List<Student> temp = new ArrayList<>();
-        for(int i=0; i < students.size()-1; i++) {
-            if (students.get(i).getUniversity()
-                    .equalsIgnoreCase(students.get(i + 1).getUniversity())) {
-                temp.add(students.get(i));
-            } else {
-                temp.add(students.get(i));
-                Student s = findOverallTopper(temp);
-                toppers.put(s.getUniversity(), s);
-                temp.clear();
-            }
-        }
-        return new HashMap<>(toppers);
+        gradedStudents.stream()
+                .collect(Collectors.groupingBy(Student::getUniversity))
+                .forEach((k, v) -> {
+                    toppers.put(k, findOverallTopper(v));
+                });
+        return toppers;
     }
 }

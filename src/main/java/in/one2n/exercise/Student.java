@@ -1,5 +1,7 @@
 package in.one2n.exercise;
 
+import java.util.Objects;
+
 public class Student {
 
     private String firstname;
@@ -42,22 +44,6 @@ public class Student {
         return university;
     }
 
-    public Double getTest1Score() {
-        return test1Score;
-    }
-
-    public Double getTest2Score() {
-        return test2Score;
-    }
-
-    public Double getTest3Score() {
-        return test3Score;
-    }
-
-    public Double getTest4Score() {
-        return test4Score;
-    }
-
     public Double getFinalScore() {
         return finalScore;
     }
@@ -66,7 +52,7 @@ public class Student {
         return grade;
     }
 
-    public Grade calcGrade(){
+    public void calcGrade(){
         calcFinalScore();
         if(finalScore < 35)
             grade = Grade.F;
@@ -76,48 +62,28 @@ public class Student {
             grade = Grade.B;
         else
             grade = Grade.A;
-        return grade;
     }
 
-    public Double calcFinalScore(){
+    public void calcFinalScore(){
         finalScore = (test1Score+test2Score+test3Score+test4Score) / 4;
-        return finalScore;
     }
 
-    public static Student deepCopy(Student s){
-        Student student = new Student(s.getFirstname(),
-                s.getLastname(),
-                s.getUniversity(),
-                s.getTest1Score(),
-                s.getTest2Score(),
-                s.getTest3Score(),
-                s.getTest4Score());
-        student.calcGrade();
-        return student;
+    /*
+    * Used firstname, lastname and university since these fields remains constant
+    *  than others.
+    * */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return firstname.equals(student.firstname) && lastname.equals(student.lastname) && university.equals(student.university);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != this.getClass())
-            return false;
-        if(!this.toString().equals(obj.toString()))
-            return false;
-        return true;
+    public int hashCode() {
+        return Objects.hash(firstname, lastname, university);
     }
 
-    @Override
-    public String toString() {
-        return "Student{" +
-                "firstname='" + firstname + '\'' +
-                ", lastname='" + lastname + '\'' +
-                ", university='" + university + '\'' +
-                ", test1Score=" + test1Score +
-                ", test2Score=" + test2Score +
-                ", test3Score=" + test3Score +
-                ", test4Score=" + test4Score +
-                ", finalScore=" + finalScore +
-                ", grade=" + grade +
-                '}';
-    }
 }
 
